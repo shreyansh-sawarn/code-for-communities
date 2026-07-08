@@ -1,6 +1,6 @@
-# 🏛️ Prioritize - AI-Powered Constituency Development Platform
+# 🏛️ Jan Priority Bharat - AI-Powered Constituency Development Platform
 
-**Prioritize** is a serverless, single-page, multi-lingual constituency priorities dashboard designed for **Track 1: People's Priorities**. It bridges the gap between citizens and their local Members of Parliament (MPs). It allows citizens to voice their grievances via speech or text in native languages and provides MPs with an AI-prioritized, map-based emergency dispatch and decision dashboard.
+**Jan Priority Bharat** is a serverless, single-page, multi-lingual constituency priorities dashboard designed for **Track 1: People's Priorities**. It bridges the gap between citizens and their local Members of Parliament (MPs). It allows citizens to voice their grievances via speech or text in native languages and provides MPs with an AI-prioritized, map-based emergency dispatch and decision dashboard.
 
 Designed with **zero backend server costs**, the platform runs entirely client-side, making it highly secure, deployable in seconds, and completely free to operate.
 
