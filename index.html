@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prioritize - AI Constituency Development Platform</title>
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css" />
+  
+  <!-- FontAwesome Icons for visual excellence -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">P</div>
+      <div class="logo-title">
+        <h1>Prioritize</h1>
+        <p>AI-Powered Constituency Development</p>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <div class="role-switcher">
+        <button class="role-btn active" id="btn-citizen-role"><i class="fa-solid fa-users"></i> Citizen Portal</button>
+        <button class="role-btn" id="btn-mp-role"><i class="fa-solid fa-user-tie"></i> MP Dashboard</button>
+      </div>
+      <div class="badge badge-live">Live</div>
+      <button class="btn-icon" id="open-settings" title="Settings">
+        <i class="fa-solid fa-gear"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <main>
+    <!-- Left Pane: Citizen Feedback Portal -->
+    <section id="citizen-pane" class="glass-card citizen-panel">
+      <div>
+        <h2 class="section-title"><i class="fa-solid fa-users"></i> Citizen Feedback Portal</h2>
+      </div>
+
+      <!-- Voice Recording Interface -->
+      <div class="voice-section" id="voice-card">
+        <div class="voice-btn-container">
+          <button class="voice-btn" id="record-btn">
+            <i class="fa-solid fa-microphone"></i>
+          </button>
+          <div class="ripple"></div>
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+          <select class="lang-selector" id="voice-lang">
+            <option value="en-IN">English (India)</option>
+            <option value="hi-IN">Hindi (हिन्दी)</option>
+            <option value="te-IN">Telugu (తెలుగు)</option>
+          </select>
+        </div>
+        <p class="voice-status" id="record-status">Click to speak in your native language</p>
+      </div>
+
+      <!-- Text input -->
+      <div class="input-group">
+        <label class="input-label" for="complaint-text">
+          <span>Detailed Complaint Description</span>
+        </label>
+        <textarea class="text-area" id="complaint-text" placeholder="Explain the issue (e.g., Water supply is contaminated, road pothole near primary school...)"></textarea>
+      </div>
+
+      <!-- Metadata & Mock Attachments -->
+      <div class="form-row">
+        <div class="input-group">
+          <label class="input-label" for="citizen-name">Your Name</label>
+          <input type="text" class="text-input" id="citizen-name" placeholder="Anonymous" />
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="citizen-contact">Contact Number</label>
+          <input type="text" class="text-input" id="citizen-contact" placeholder="98765 XXXXX" />
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="citizen-photo">Attach Photo Proof</label>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <input type="file" id="citizen-photo" accept="image/*" class="text-input" style="padding: 0.35rem 0.5rem; flex: 1; height: 38px;" />
+          <button type="button" class="btn-icon" id="clear-photo" title="Clear photo" style="display: none; height: 38px; width: 38px; flex-shrink: 0;">
+            <i class="fa-solid fa-trash-can" style="color: var(--accent-rose);"></i>
+          </button>
+        </div>
+        <div id="photo-preview-container" style="display: none; margin-top: 0.5rem; border: 1px solid var(--glass-border); border-radius: var(--radius-sm); overflow: hidden; max-height: 120px; background: rgba(0,0,0,0.2); position: relative; text-align: center;">
+          <img id="photo-preview" style="max-width: 100%; max-height: 120px; object-fit: contain;" />
+        </div>
+      </div>
+
+      <!-- User Friendly Location Ingestion -->
+      <div class="input-group">
+        <label class="input-label" for="incident-address">
+          <span>Location / Landmark / Address</span>
+          <span style="color: var(--accent-indigo); cursor: pointer;" id="locate-btn" title="Locate on map">
+            <i class="fa-solid fa-location-dot"></i> Locate on Map
+          </span>
+        </label>
+        <input type="text" class="text-input" id="incident-address" placeholder="e.g. Delhi Railway Station" />
+      </div>
+
+      <div class="form-row" style="margin-top: 0.25rem;">
+        <button type="button" class="text-input" id="gps-btn" style="cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(30, 41, 59, 0.35); border: 1px solid var(--glass-border); width: 100%;">
+          <i class="fa-solid fa-crosshairs" style="color: var(--accent-indigo);"></i> Use My GPS Location
+        </button>
+      </div>
+
+      <!-- Hidden coordinates for Leaflet mapping -->
+      <input type="hidden" id="lat-input" />
+      <input type="hidden" id="lng-input" />
+
+      <button class="btn-primary" id="submit-complaint">
+        <i class="fa-solid fa-paper-plane"></i> Submit to AI Pipeline
+      </button>
+    </section>
+
+    <!-- Right Pane: MP Decision Dashboard -->
+    <section id="mp-pane" class="glass-card dashboard-panel citizen-mode logged-out">
+      <!-- MP Auth Gateway Card -->
+      <div id="admin-login-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; max-width: 400px; margin: 0 auto; gap: 1rem; width: 100%;">
+        <div style="text-align: center; margin-bottom: 0.5rem;">
+          <div class="logo-icon" style="margin: 0 auto 0.75rem auto; width: 3.5rem; height: 3.5rem; font-size: 1.75rem; background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple)); display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-weight: 700; color: white;">M</div>
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">MP Administration Login</h3>
+          <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">Access secure constituency development controls</p>
+        </div>
+        <div class="input-group" style="width: 100%;">
+          <label class="input-label" for="login-id">MP ID / Username</label>
+          <input type="text" class="text-input" id="login-id" placeholder="e.g. MP_PALNADU or MP_DELHI" />
+        </div>
+        <div class="input-group" style="width: 100%;">
+          <label class="input-label" for="login-pw">Security Password</label>
+          <input type="password" class="text-input" id="login-pw" placeholder="password (admin)" />
+        </div>
+        <button class="btn-primary" id="btn-login-submit" style="width: 100%; height: 38px;">
+          <i class="fa-solid fa-lock-open"></i> Authenticate & Load
+        </button>
+        <p style="font-size: 0.65rem; color: var(--text-secondary); text-align: center; line-height: 1.4; margin-top: 0.25rem;">
+          Try typing <strong style="color: var(--accent-indigo);">MP_PALNADU</strong>, <strong style="color: var(--accent-indigo);">MP_DELHI</strong>, <strong style="color: var(--accent-indigo);">MP_HOWRAH</strong>, <strong style="color: var(--accent-indigo);">MP_GUNTUR</strong>, or <strong style="color: var(--accent-indigo);">MP_HYDERABAD</strong><br/>Password: <strong style="color: var(--accent-indigo);">admin</strong>
+        </p>
+      </div>
+
+      <!-- 1. Top Metrics Bar -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <span class="stat-val" id="stat-total">5</span>
+          <span class="stat-lbl">Total Inputs</span>
+        </div>
+        <div class="stat-card" style="border-left: 2px solid var(--accent-rose);">
+          <span class="stat-val" id="stat-critical" style="color: var(--accent-rose);">2</span>
+          <span class="stat-lbl">Critical Issues (Urgency &ge; 8)</span>
+        </div>
+        <div class="stat-card" style="border-left: 2px solid var(--accent-blue);">
+          <span class="stat-val" id="stat-resolved" style="color: var(--accent-blue);">0</span>
+          <span class="stat-lbl">Resolved Inquiries</span>
+        </div>
+        <div class="stat-card" style="border-left: 2px solid var(--accent-purple);">
+          <span class="stat-val" id="stat-confidence" style="color: var(--accent-purple);">98%</span>
+          <span class="stat-lbl">AI Confidence</span>
+        </div>
+        <div class="stat-card" style="border-left: 2px solid var(--accent-rose); display: flex; align-items: center; justify-content: center; padding: 0.5rem 0.85rem;">
+          <button class="btn-primary" id="btn-admin-logout" style="background: linear-gradient(135deg, var(--accent-rose), #be123c); box-shadow: 0 4px 12px rgba(244,63,94,0.2); border: none; height: 38px; width: 100%; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.3rem; border-radius: var(--radius-sm); outline: none;">
+            <i class="fa-solid fa-right-from-bracket"></i> Log Out
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Core Map & Sidebar Grid -->
+      <div class="dashboard-core">
+        <div class="map-container">
+          <div id="map"></div>
+        </div>
+        
+        <div class="priority-sidebar">
+          <div style="margin-bottom: 0.75rem;">
+            <h3 class="section-title" style="margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem;">
+              <span><i class="fa-solid fa-list-ol"></i> Grievance Queue</span>
+              <span class="badge badge-live" id="sidebar-tab-badge" style="font-size: 0.65rem; padding: 0.15rem 0.5rem;">Active Queue</span>
+            </h3>
+            <div style="display: flex; gap: 0.25rem; background: rgba(15, 23, 42, 0.4); padding: 0.2rem; border-radius: var(--radius-sm); border: 1px solid var(--glass-border);">
+              <button class="role-btn active" id="tab-active" style="flex: 1; padding: 0.3rem; font-size: 0.7rem; justify-content: center; border-radius: 4px; height: 28px;"><i class="fa-solid fa-fire"></i> Active (<span id="count-active">0</span>)</button>
+              <button class="role-btn" id="tab-resolved" style="flex: 1; padding: 0.3rem; font-size: 0.7rem; justify-content: center; border-radius: 4px; height: 28px;"><i class="fa-solid fa-circle-check"></i> Resolved (<span id="count-resolved">0</span>)</button>
+            </div>
+          </div>
+          <div class="priority-list" id="priority-list-container">
+            <!-- Priority Cards injected dynamically here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Dynamic Console / Logs -->
+      <div class="system-console">
+        <div class="console-header">
+          <div class="console-title">
+            <i class="fa-solid fa-terminal"></i> AI Processing Logs & Model Fallbacks
+          </div>
+          <span id="active-model-badge" style="font-size: 0.7rem; font-family: monospace; color: var(--accent-blue);">Model: Gemini 3.1 Flash</span>
+        </div>
+        <div class="console-body" id="console-logs">
+          <div class="console-line console-success">[SYSTEM] Platform initialized successfully.</div>
+          <div class="console-line">[MAP] Narasaraopet center loaded at (16.2366, 80.0531).</div>
+          <div class="console-line">[STORAGE] 5 baseline complaints loaded from Cache.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-key"></i> Settings & API Credentials</h3>
+        <button class="modal-close" id="close-settings">&times;</button>
+      </div>
+      <div class="input-group">
+        <label class="input-label" for="api-key">Google AI Studio API Key</label>
+        <input type="password" class="text-input" id="api-key" placeholder="AIzaSy..." />
+        <p style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.25rem;">
+          Get a free key from <a href="https://aistudio.google.com/" target="_blank" style="color: var(--accent-indigo);">Google AI Studio</a>. Keys are stored locally in your browser.
+        </p>
+      </div>
+      <div class="input-group">
+        <label class="input-label" for="primary-model">Primary AI Model</label>
+        <select class="lang-selector" id="primary-model" style="width: 100%;">
+          <option value="gemini-3.1-flash">Gemini 3.1 Flash (Recommended - Smartest)</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash (Balanced)</option>
+          <option value="gemini-1.5-flash">Gemini 1.5 Flash (Legacy/Stable)</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="save-settings" style="margin-top: 0.5rem;">
+        <i class="fa-solid fa-floppy-disk"></i> Save Settings
+      </button>
+    </div>
+  </div>
+
+  <!-- Photo Viewer Modal -->
+  <div class="modal-overlay" id="photo-viewer-modal">
+    <div class="modal-card" style="max-width: 800px; padding: 1.25rem; width: 90%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="margin-bottom: 0.75rem;">
+        <h3><i class="fa-solid fa-image"></i> Attachment Viewer</h3>
+        <button class="modal-close" id="close-photo-viewer">&times;</button>
+      </div>
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center; background: #0b0f19; border-radius: var(--radius-md); overflow: hidden; padding: 0.5rem; border: 1px solid var(--glass-border);">
+        <img id="modal-photo-img" src="" style="max-width: 100%; max-height: 65vh; object-fit: contain; border-radius: 4px;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Main Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
